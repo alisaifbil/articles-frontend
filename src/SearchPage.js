@@ -43,7 +43,7 @@ function handleSort(sortParameter, articlesArray) {
   return sortedArr;
 }
 
-function App() {
+function SearchPage() {
   const [rows, setRows] = useState([]);
   const [sortParam, setSortParam] = useState("");
   const [searchTitle, setSearchTitle] = useState("");
@@ -125,4 +125,4 @@ function App() {
   );
 }
 
-export default App;
+export default SearchPage;
