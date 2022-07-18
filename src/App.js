@@ -42,7 +42,11 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(`${URL}/getAll`)
+      .get(`${URL}/getAll`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'}
+      })
       .then((response) => {
         setRows([...response.data]);
       })
@@ -59,7 +63,9 @@ function App() {
 
   const handleSearch = () => {
     axios.get(`${URL}/findByTitle`, {
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'},
       params: {
         metaTitle: searchTitle
       }

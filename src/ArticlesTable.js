@@ -127,7 +127,10 @@ function ArticlesTable(props) {
     axios
       .get(
         `${URL}/${articleDetails.category}/${articleDetails.metaTitle}`
-      )
+      , {
+        headers: { "Content-Type": "application/json" ,
+        'Access-Control-Allow-Origin': '*'}
+      })
       .then((response) => {
         console.log(response);
         if (response.data !== null) {

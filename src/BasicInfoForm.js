@@ -35,7 +35,8 @@ function BasicInfoForm() {
   const submitForm = () => {
     axios
       .post(`${URL}/sendEmail`, {
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" ,
+        'Access-Control-Allow-Origin': '*'},
         body: {
           name: name,
           sendTo: email
