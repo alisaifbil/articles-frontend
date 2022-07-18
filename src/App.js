@@ -1,31 +1,21 @@
 import React, { useEffect, useState } from "react";
-
 import {
-  Box,
-  Table,
-  TableBody,
-  TableContainer,
-  TableFooter,
-  TablePagination,
-  TableRow,
-  Paper,
   IconButton,
   Grid,
-  TableHead,
   TextField,
-  Fab,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ArticlesTable from "./ArticlesTable";
+import BasicInfoForm from "./BasicInfoForm"; 
+import { Navigate } from "react-router-dom";
 const axios = require("axios").default;
+const URL = 'https://express-app-hazel.vercel.app/';
 
 function handleSort(sortParameter, articlesArray) {
-
   let sortParam = sortParameter;
   let sortedArr = articlesArray;
 
@@ -47,10 +37,12 @@ function App() {
   const [rows, setRows] = useState([]);
   const [sortParam, setSortParam] = useState("");
   const [searchTitle, setSearchTitle] = useState("");
+  const [redirectTo, setRedirectTo] = useState("");
+  const [allowRedirection, setAllowRedirection] = useState(false);
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/getAll")
+      .get(`${URL}/getAll`)
       .then((response) => {
         setRows([...response.data]);
       })
@@ -66,9 +58,28 @@ function App() {
   };
 
   const handleSearch = () => {
-    const result = rows.filter(articles => articles.metaTitle.includes(searchTitle));
-    setRows([...result]);
-  }
+    axios.get(`${URL}/findByTitle`, {
+      headers: {'Content-Type': 'application/json'},
+      params: {
+        metaTitle: searchTitle
+      }
+    }
+    )
+      .then((response) => {
+        console.log(response);
+        if (response.data !== null) {
+          let urlParams = response.data;
+          setRedirectTo(`/${urlParams.category}/${urlParams.metaTitle}`);
+          setAllowRedirection(true);
+        } else {
+          setRedirectTo(`/PageNotFound`);
+          setAllowRedirection(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const sortArticles = (event) => {
     event.preventDefault();
@@ -77,51 +88,57 @@ function App() {
   };
 
   return (
-    <Grid style={{ margin: "25px" }}>
-      <Grid style={{ marginBottom: "10px" }} alignItems="flex-start" container>
-        <TextField
-          id="search-bar"
-          className="text"
-          label="Enter Title"
-          variant="outlined"
-          placeholder="Search By Title Name"
-          size="small"
-          value={searchTitle}
-          onChange={handleSearchBarChange}
-        />
-        <IconButton aria-label="search" onClick={handleSearch}>
-          <SearchIcon style={{ fill: "blue" }} />
-        </IconButton>
+    <div>
+      {allowRedirection ? <Navigate to={`${redirectTo}`} /> : ""}
 
-        <FormControl sx={{ ml: 4, minWidth: 120 }} size="small">
-          <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={sortParam}
-            label="Sort By"
-            onChange={sortArticles}
-          >
-            <MenuItem value={"category"}>Category</MenuItem>
-            <MenuItem value={"newest"}>Newest</MenuItem>
-            <MenuItem value={"oldest"}>Oldest</MenuItem>
-            <MenuItem value={"ascending"}>Ascending</MenuItem>
-            <MenuItem value={"descending"}>Descending</MenuItem>
-          </Select>
-        </FormControl>
-        <IconButton
-          aria-label="sortButton"
-          onClick={() => setRows([...handleSort(sortParam, rows)])}
+      <Grid style={{ margin: "25px" }}>
+        <Grid
+          style={{ marginBottom: "10px" }}
+          alignItems="flex-start"
+          container
         >
-          <SearchIcon style={{ fill: "blue" }} />
-        </IconButton>
-        {/* <Button onClick={() => setRows([...handleSort(sortParam, rows)])}>
-          Update
-        </Button> */}
-      </Grid>
+          <TextField
+            id="search-bar"
+            className="text"
+            label="Enter Title"
+            variant="outlined"
+            placeholder="Search By Title Name"
+            size="small"
+            value={searchTitle}
+            onChange={handleSearchBarChange}
+          />
+          <IconButton aria-label="search" onClick={handleSearch}>
+            <SearchIcon style={{ fill: "blue" }} />
+          </IconButton>
 
-      <ArticlesTable articles={rows} />
-    </Grid>
+          <FormControl sx={{ ml: 4, minWidth: 120 }} size="small">
+            <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={sortParam}
+              label="Sort By"
+              onChange={sortArticles}
+            >
+              <MenuItem value={"category"}>Category</MenuItem>
+              <MenuItem value={"newest"}>Newest</MenuItem>
+              <MenuItem value={"oldest"}>Oldest</MenuItem>
+              <MenuItem value={"ascending"}>Ascending</MenuItem>
+              <MenuItem value={"descending"}>Descending</MenuItem>
+            </Select>
+          </FormControl>
+          <IconButton
+            aria-label="sortButton"
+            onClick={() => setRows([...handleSort(sortParam, rows)])}
+          >
+            <SearchIcon style={{ fill: "blue" }} />
+          </IconButton>
+        </Grid>
+
+        <ArticlesTable articles={rows} />
+        <BasicInfoForm />
+      </Grid>
+    </div>
   );
 }
 

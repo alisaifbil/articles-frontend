@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTheme, styled } from "@mui/material/styles";
 import {
@@ -11,25 +11,16 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Grid,
   TableHead,
-  TextField,
-  Fab,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
 } from "@mui/material";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import { Link, Navigate } from "react-router-dom";
-import SearchIcon from "@mui/icons-material/Search";
+import {  Navigate } from "react-router-dom";
 const axios = require("axios").default;
-
+const URL = 'https://express-app-hazel.vercel.app/';
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -111,8 +102,10 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 function ArticlesTable(props) {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [redirectTo, setRedirectTo] = useState("");
+  const [allowRedirection, setAllowRedirection] = useState(false);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -130,77 +123,89 @@ function ArticlesTable(props) {
   };
 
   const handleRowClick = (articleDetails) => {
-    // console.log(articleDetails);
-    axios.get(`http://localhost:3000/${articleDetails.category}/${articleDetails.metaTitle}`)
-    .then((response) => {
-        if(response.data !== null){
-            
+    
+    axios
+      .get(
+        `${URL}/${articleDetails.category}/${articleDetails.metaTitle}`
+      )
+      .then((response) => {
+        console.log(response);
+        if (response.data !== null) {
+          let urlParams = response.data;
+          setRedirectTo(`/${urlParams.category}/${urlParams.metaTitle}`);
+          setAllowRedirection(true);
+        } else {
+          setRedirectTo(`/PageNotFound`);
+          setAllowRedirection(true);
         }
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.log(error);
       });
-  }
+  };
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Title</StyledTableCell>
-            <StyledTableCell align="center">Category</StyledTableCell>
-            <StyledTableCell align="center">Published On</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0
-            ? props.articles.slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage
-              )
-            : props.articles
-          ).map((row) => (
-            <TableRow key={row._id} hover onClick={() => handleRowClick(row)}>
-              <TableCell component="th" scope="row">
-                {row.metaTitle}
-              </TableCell>
-              <TableCell style={{ width: 200 }} align="center">
-                {row.category}
-              </TableCell>
-              <TableCell style={{ width: 200 }} align="center">
-                {row.publishedOn.split("T")[0]}
-              </TableCell>
+    <div>
+      {allowRedirection ? <Navigate to={`${redirectTo}`} /> : ""}
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Title</StyledTableCell>
+              <StyledTableCell align="center">Category</StyledTableCell>
+              <StyledTableCell align="center">Published On</StyledTableCell>
             </TableRow>
-          ))}
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? props.articles.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : props.articles
+            ).map((row) => (
+              <TableRow key={row._id} hover onClick={() => handleRowClick(row)}>
+                <TableCell component="th" scope="row">
+                  {row.metaTitle}
+                </TableCell>
+                <TableCell style={{ width: 200 }} align="center">
+                  {row.category}
+                </TableCell>
+                <TableCell style={{ width: 200 }} align="center">
+                  {row.publishedOn.split("T")[0]}
+                </TableCell>
+              </TableRow>
+            ))}
 
-          {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={6} />
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={3}
+                count={props.articles.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {
+                    "aria-label": "rows per page",
+                  },
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
             </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-              colSpan={3}
-              count={props.articles.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: {
-                  "aria-label": "rows per page",
-                },
-                native: true,
-              }}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    </div>
   );
 }
 
