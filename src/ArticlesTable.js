@@ -18,9 +18,9 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import {  Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 const axios = require("axios").default;
-const URL = 'https://express-app-hazel.vercel.app/';
+const URL = "https://express-app-hazel.vercel.app";
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -123,13 +123,12 @@ function ArticlesTable(props) {
   };
 
   const handleRowClick = (articleDetails) => {
-    
     axios
-      .get(
-        `${URL}/${articleDetails.category}/${articleDetails.metaTitle}`
-      , {
-        headers: { "Content-Type": "application/json" ,
-        'Access-Control-Allow-Origin': '*'}
+      .get(`${URL}/${articleDetails.category}/${articleDetails.metaTitle}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       })
       .then((response) => {
         console.log(response);

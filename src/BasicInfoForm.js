@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 const axios = require("axios").default;
-const URL = 'https://express-app-hazel.vercel.app/';
+const URL = 'https://express-app-hazel.vercel.app';
 
 function BasicInfoForm() {
 

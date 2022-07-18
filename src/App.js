@@ -13,7 +13,7 @@ import ArticlesTable from "./ArticlesTable";
 import BasicInfoForm from "./BasicInfoForm"; 
 import { Navigate } from "react-router-dom";
 const axios = require("axios").default;
-const URL = 'https://express-app-hazel.vercel.app/';
+const URL = 'https://express-app-hazel.vercel.app';
 
 function handleSort(sortParameter, articlesArray) {
   let sortParam = sortParameter;
